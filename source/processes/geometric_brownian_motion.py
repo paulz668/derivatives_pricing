@@ -1,5 +1,5 @@
 import numpy as np
-import stochastic_process as sp
+from . import stochastic_process as sp
 
 
 class GeometricBrownianMotion(sp.StochasticProcess):
@@ -45,7 +45,7 @@ class GeometricBrownianMotion(sp.StochasticProcess):
         )
 
     def skewness(self, t):
-        return (np.exp(self.diffusion * t) - 2) * np.sqrt(
+        return (np.exp(self.diffusion * t) + 2) * np.sqrt(
             np.exp(self.diffusion * t) - 1
         )
 

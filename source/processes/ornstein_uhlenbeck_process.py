@@ -1,5 +1,5 @@
 import numpy as np
-import stochastic_process as sp
+from . import stochastic_process as sp
 
 
 class OrnsteinUhlenbeckProcess(sp.StochasticProcess):

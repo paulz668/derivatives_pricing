@@ -96,7 +96,7 @@ class StochasticProcess:
     def _validate_parameters(self):
         """Validate process parameters"""
         if self.diffusion <= 0:
-            raise ValueError("Diffusion coefficient must be non-negative")
+            raise ValueError("Diffusion coefficient must be positive")
         if self.dimension < 1:
             raise ValueError("Dimension must be ≥ 1")
 
