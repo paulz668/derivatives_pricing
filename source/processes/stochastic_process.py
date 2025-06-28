@@ -1,11 +1,12 @@
 import numpy as np
 import numpy.typing as npt
 
+from abc import ABC, abstractmethod
 from typing import Optional, Union
 from _collections_abc import Callable
 
 
-class StochasticProcess:
+class StochasticProcess(ABC):
     def __init__(
         self,
         drift: Union[
@@ -35,6 +36,7 @@ class StochasticProcess:
         self.dimension = dimension
         self._validate_parameters()
 
+    @abstractmethod
     def simulate(
         self,
         n_paths: np.integer,
@@ -66,8 +68,9 @@ class StochasticProcess:
         times : ndarray (optional)
             Time points if return_times=True
         """
-        raise NotImplementedError("Subclasses must implement this method")
+        pass
 
+    @abstractmethod
     def _discretize(
         self,
         prev_value: np.floating,
@@ -91,7 +94,7 @@ class StochasticProcess:
         new_value : float
             Value at next time step
         """
-        raise NotImplementedError("Subclasses must implement this method")
+        pass
 
     def _validate_parameters(self):
         """Validate process parameters"""
@@ -100,18 +103,22 @@ class StochasticProcess:
         if self.dimension < 1:
             raise ValueError("Dimension must be ≥ 1")
 
+    @abstractmethod
     def mean(self, t: np.floating) -> np.floating:
         """Theoretical mean at time t"""
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def variance(self, t: np.floating) -> np.floating:
         """Theoretical variance at time t"""
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def skewness(self, t: np.floating) -> np.floating:
         """Theoretical skewness at time t"""
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def kurtosis(self, t: np.floating) -> np.floating:
         """Theoretical kurtosis at time t"""
-        raise NotImplementedError
+        pass
