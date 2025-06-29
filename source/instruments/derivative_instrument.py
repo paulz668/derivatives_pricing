@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Union, Callable
+import numpy as np
 import numpy.typing as npt
 
 class DerivativeInstrument(ABC):
     def __init__(self, 
-                 underlying: Union[float, npt.ArrayLike],
-                 maturity: float,
+                 underlying: Union[np.floating, npt.ArrayLike],
+                 maturity: np.floating,
                  payoff_fn: Optional[Callable] = None):
         """
         Parameters:
@@ -19,7 +20,7 @@ class DerivativeInstrument(ABC):
         self.payoff_fn = payoff_fn
         
     @abstractmethod
-    def price(self, model) -> float:
+    def price(self, model) -> np.floating:
         """Price the instrument using the given model"""
         pass
         
@@ -28,3 +29,8 @@ class DerivativeInstrument(ABC):
         if self.payoff_fn is not None:
             return self.payoff_fn(underlying_values)
         raise NotImplementedError("Payoff function not defined")
+    
+    @abstractmethod
+    def _validate_paramaters(self):
+        """Validate the given parameters"""
+        pass
