@@ -2,6 +2,7 @@ import numpy as np
 from . import derivative_instrument as d
 from ..models import pricing_model as p
 
+
 class EuropeanOption(d.DerivativeInstrument):
     def __init__(self, strike: np.floating, is_call: np.bool_, **kwargs):
         super().__init__(**kwargs)
@@ -11,12 +12,12 @@ class EuropeanOption(d.DerivativeInstrument):
 
     def price(self, model: p.PricingModel) -> np.floating:
         return model.calculate_price(self)
-    
+
     def payoff(self, underlying_values):
         if self.is_call:
             return np.maximum(underlying_values - self.strike, 0)
         return np.maximum(self.strike - underlying_values, 0)
-    
+
     def _validate_parameters(self):
         if self.strike < 0:
             raise ValueError("strike has to be non-negative")

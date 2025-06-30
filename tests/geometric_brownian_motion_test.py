@@ -33,7 +33,9 @@ class TestGeometricBrownianMotion:
         random_normal = np.array([0.5, -0.5])
 
         result = gbm._discretize(prev_value, dt, random_normal)
-        expected = prev_value * np.exp((0.1 - 0.5 / 2) * dt + np.sqrt(0.5 * dt) * random_normal)
+        expected = prev_value * np.exp(
+            (0.1 - 0.5 / 2) * dt + np.sqrt(0.5 * dt) * random_normal
+        )
         np.testing.assert_allclose(result, expected)
 
     # Simulation Tests
