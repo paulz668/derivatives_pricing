@@ -3,11 +3,10 @@ from . import derivative_instrument as d
 from ..models import pricing_model as p
 
 
-class EuropeanOption(d.DerivativeInstrument):
-    def __init__(self, strike: np.floating, is_call: np.bool_, **kwargs):
+class Forward(d.DerivativeInstrument):
+    def __init__(self, forward_price: np.floating, **kwargs):
         super().__init__(**kwargs)
-        self.strike = strike
-        self.is_call = is_call
+        self.forward_price = forward_price
         self._validate_parameters()
 
     def price(self, model: p.PricingModel) -> np.floating:
@@ -15,9 +14,6 @@ class EuropeanOption(d.DerivativeInstrument):
 
     def delta(self, model: p.PricingModel) -> np.floating:
         return model.calculate_delta(self)
-
-    def vega(self, model: p.PricingModel) -> np.floating:
-        return model.calculate_vega(self)
 
     def theta(self, model: p.PricingModel) -> np.floating:
         return model.calculate_theta(self)
@@ -29,13 +25,11 @@ class EuropeanOption(d.DerivativeInstrument):
         return model.calculate_epsilon(self)
 
     def payoff(self, underlying_values):
-        if self.is_call:
-            return np.maximum(underlying_values - self.strike, 0)
-        return np.maximum(self.strike - underlying_values, 0)
+        return underlying_values - self.forward_price
 
     def _validate_parameters(self):
-        if self.strike < 0:
-            raise ValueError("strike has to be non-negative")
+        if self.forward_price < 0:
+            raise ValueError("forward_price has to be non-negative")
         if self.underlying <= 0:
             raise ValueError("underlying has to be positive")
         if self.maturity <= 0:

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from source.models.black_scholes import BlackScholes
-from source.instruments.vanilla_options import EuropeanOption
+from source.instruments.european_option import EuropeanOption
 
 
 class TestBlackScholes:

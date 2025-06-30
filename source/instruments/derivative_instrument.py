@@ -8,7 +8,7 @@ class DerivativeInstrument(ABC):
     def __init__(
         self,
         underlying: Union[np.floating, npt.ArrayLike],
-        maturity: np.floating,
+        time_to_maturity: np.floating,
         payoff_fn: Optional[Callable] = None,
     ):
         """
@@ -19,7 +19,7 @@ class DerivativeInstrument(ABC):
         payoff_fn : Function defining the instrument's payoff
         """
         self.underlying = underlying
-        self.maturity = maturity
+        self.time_to_maturity = time_to_maturity
         self.payoff_fn = payoff_fn
 
     @abstractmethod

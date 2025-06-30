@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from source.instruments.vanilla_options import *
+from source.instruments.european_option import *
 from source.models.black_scholes import BlackScholes
 
 
