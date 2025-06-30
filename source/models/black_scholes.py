@@ -33,6 +33,11 @@ class BlackScholes(p.PricingModel):
             return False
 
     def calculate_price(self, instrument: DerivativeInstrument):
+        """
+        Calculate the price of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
@@ -55,6 +60,11 @@ class BlackScholes(p.PricingModel):
                 ) * norm.cdf(-d1)
 
     def calculate_delta(self, instrument: DerivativeInstrument):
+        """
+        Calculate the delta (dV/dS) of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
@@ -72,6 +82,11 @@ class BlackScholes(p.PricingModel):
                 return -np.exp(-self.q * T) * norm.cdf(-d1)
 
     def calculate_vega(self, instrument: DerivativeInstrument):
+        """
+        Calculate the vega (dV/dσ) of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
@@ -86,6 +101,11 @@ class BlackScholes(p.PricingModel):
             return np.exp(-self.q * T) * norm.cdf(d1)
 
     def calculate_theta(self, instrument: DerivativeInstrument):
+        """
+        Calculate the theta (dV/dT) of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
@@ -116,6 +136,11 @@ class BlackScholes(p.PricingModel):
                 )
 
     def calculate_rho(self, instrument: DerivativeInstrument):
+        """
+        Calculate the theta (dV/dr) of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
@@ -134,6 +159,11 @@ class BlackScholes(p.PricingModel):
                 return -K * T * np.exp(-self.r * T) * norm.cdf(-d2)
 
     def calculate_epsilon(self, instrument: DerivativeInstrument):
+        """
+        Calculate the theta (dV/dq) of a derivative instrument in the Black-Scholes world
+        Currently supported instruments:
+        - European options
+        """
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, EuropeanOption):
