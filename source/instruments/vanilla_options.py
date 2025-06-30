@@ -13,6 +13,21 @@ class EuropeanOption(d.DerivativeInstrument):
     def price(self, model: p.PricingModel) -> np.floating:
         return model.calculate_price(self)
 
+    def delta(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_delta(self)
+
+    def vega(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_vega(self)
+
+    def theta(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_theta(self)
+
+    def rho(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_rho(self)
+
+    def epsilon(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_epsilon(self)
+
     def payoff(self, underlying_values):
         if self.is_call:
             return np.maximum(underlying_values - self.strike, 0)
