@@ -4,8 +4,10 @@ from ..models import pricing_model as p
 
 
 class EuropeanOption(d.DerivativeInstrument):
-    def __init__(self, strike: np.floating, is_call: np.bool_, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self, underlying, strike: np.floating, time_to_maturity, is_call: np.bool_
+    ):
+        super().__init__(underlying, time_to_maturity)
         self.strike = strike
         self.is_call = is_call
         self._validate_parameters()
@@ -39,9 +41,11 @@ class EuropeanOption(d.DerivativeInstrument):
     def _validate_parameters(self):
         if self.strike < 0:
             raise ValueError("strike has to be non-negative")
+        if isinstance(self.is_call, np.bool_):
+            raise ValueError("is_call has to be a boolean")
         if self.underlying <= 0:
             raise ValueError("underlying has to be positive")
-        if self.maturity <= 0:
+        if self.time_to_maturity <= 0:
             raise ValueError("maturity has to be positive")
         if self.payoff_fn is not None:
             raise ValueError("payoff_fn has to be None")

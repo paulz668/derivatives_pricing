@@ -5,6 +5,7 @@ from . import pricing_model as p
 from ..instruments.derivative_instrument import DerivativeInstrument
 from ..instruments.forward import Forward
 from ..instruments.european_option import EuropeanOption
+from ..instruments.binary_option import *
 
 
 class BlackScholes(p.PricingModel):
@@ -28,7 +29,11 @@ class BlackScholes(p.PricingModel):
 
     def supports_instrument(self, instrument: DerivativeInstrument) -> np.bool_:
         """Check if instrument is supported"""
-        supported_instruments = {"Forward": True, "European Option": True}
+        supported_instruments = {
+            "Forward": True,
+            "EuropeanOption": True,
+            "CashOrNothingBinaryOption": True,
+        }
 
         return supported_instruments[instrument.__class__.__name__]
 
@@ -38,6 +43,7 @@ class BlackScholes(p.PricingModel):
         Currently supported instruments:
         - Forward
         - European option
+        - Cash or nothing binary option
         """
         self.validate_inputs(instrument=instrument)
 
@@ -67,12 +73,28 @@ class BlackScholes(p.PricingModel):
                     -self.q * T
                 ) * norm.cdf(-d1)
 
+        if isinstance(instrument, CashOrNothingBinaryOption):
+            S = instrument.underlying
+            K = instrument.strike
+            T = instrument.time_to_maturity
+
+            d1 = (np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T) / (
+                self.sigma * np.sqrt(T)
+            )
+            d2 = d1 - self.sigma * np.sqrt(T)
+
+            if instrument.is_call:
+                return np.exp(-self.r * T) * norm.cdf(d2)
+            else:
+                return np.exp(-self.r * T) * norm.cdf(-d2)
+
     def calculate_delta(self, instrument: DerivativeInstrument):
         """
         Calculate the delta (dV/dS) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
         - Forward
         - European option
+        - Cash or nothing binary option
         """
         self.validate_inputs(instrument=instrument)
 
@@ -95,12 +117,32 @@ class BlackScholes(p.PricingModel):
             else:
                 return -np.exp(-self.q * T) * norm.cdf(-d1)
 
+        if isinstance(instrument, CashOrNothingBinaryOption):
+            S = instrument.underlying
+            K = instrument.strike
+            T = instrument.time_to_maturity
+
+            d1 = (np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T) / (
+                self.sigma * np.sqrt(T)
+            )
+            d2 = d1 - self.sigma * np.sqrt(T)
+
+            if instrument.is_call:
+                return (
+                    np.exp(-self.r * T) * norm.pdf(d2) / (S * self.sigma * np.sqrt(T))
+                )
+            else:
+                return (
+                    -np.exp(-self.r * T) * norm.pdf(-d2) / (S * self.sigma * np.sqrt(T))
+                )
+
     def calculate_vega(self, instrument: DerivativeInstrument):
         """
         Calculate the vega (dV/dσ) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
         - Forward
         - European option
+        - Cash or nothing binary option
         """
         self.validate_inputs(instrument=instrument)
 
@@ -116,7 +158,32 @@ class BlackScholes(p.PricingModel):
                 self.sigma * np.sqrt(T)
             )
 
-            return np.exp(-self.q * T) * norm.cdf(d1)
+            return S * np.exp(-self.q * T) * norm.pdf(d1) * np.sqrt(T)
+
+        if isinstance(instrument, CashOrNothingBinaryOption):
+            S = instrument.underlying
+            K = instrument.strike
+            T = instrument.time_to_maturity
+
+            d1 = (np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T) / (
+                self.sigma * np.sqrt(T)
+            )
+            d2 = d1 - self.sigma * np.sqrt(T)
+
+            if instrument.is_call:
+                return (
+                    -np.exp(-self.r * T)
+                    * norm.pdf(d2)
+                    * d1
+                    / (self.sigma**2 * np.sqrt(T))
+                )
+            else:
+                return (
+                    np.exp(-self.r * T)
+                    * norm.pdf(-d2)
+                    * d1
+                    / (self.sigma**2 * np.sqrt(T))
+                )
 
     def calculate_theta(self, instrument: DerivativeInstrument):
         """
@@ -124,6 +191,7 @@ class BlackScholes(p.PricingModel):
         Currently supported instruments:
         - Forward
         - European option
+        - Cash or nothing binary option
         """
         self.validate_inputs(instrument=instrument)
 
@@ -158,6 +226,33 @@ class BlackScholes(p.PricingModel):
                     / (2 * np.sqrt(T))
                     + self.r * K * np.exp(-self.r * T) * norm.cdf(-d2)
                     - self.q * S * np.exp(-self.q * T) * norm.cdf(-d1)
+                )
+
+        if isinstance(instrument, CashOrNothingBinaryOption):
+            S = instrument.underlying
+            K = instrument.strike
+            T = instrument.time_to_maturity
+
+            d1 = (np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T) / (
+                self.sigma * np.sqrt(T)
+            )
+            d2 = d1 - self.sigma * np.sqrt(T)
+
+            if instrument.is_call:
+                return -self.r * np.exp(-self.r * T) * norm.cdf(d2) + np.exp(
+                    -self.r * T
+                ) * norm.pdf(d2) * (
+                    -np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T
+                ) / (
+                    2 * self.sigma * T**1.5
+                )
+            else:
+                return -self.r * np.exp(-self.r * T) * norm.cdf(-d2) + np.exp(
+                    -self.r * T
+                ) * norm.pdf(-d2) * (
+                    np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T
+                ) / (
+                    2 * self.sigma * T**1.5
                 )
 
     def calculate_rho(self, instrument: DerivativeInstrument):
