@@ -8,17 +8,17 @@ from ..models import pricing_model as p
 class CashOrNothingBinaryOption(d.DerivativeInstrument):
     def __init__(
         self,
-        underlying,
+        underlying: np.floating,
         strike: np.floating,
-        time_to_maturity,
-        cash_or_nothing_payout: Optional[np.floating],
+        time_to_maturity: np.floating,
+        payout: Optional[np.floating],
         is_call: np.bool_,
     ):
         super().__init__(underlying, time_to_maturity)
         self.strike = strike
         self.is_call = is_call
-        self.cash_or_nothing_payout = (
-            1 if cash_or_nothing_payout is None else cash_or_nothing_payout
+        self.payout = (
+            1 if payout is None else payout
         )
         self._validate_parameters()
 
@@ -46,11 +46,11 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
     def payoff(self, underlying_values):
         if self.is_call:
             return np.where(
-                underlying_values >= self.strike, self.cash_or_nothing_payout, 0
+                underlying_values >= self.strike, self.payout, 0
             )
         else:
             return np.where(
-                underlying_values < self.strike, self.cash_or_nothing_payout, 0
+                underlying_values < self.strike, self.payout, 0
             )
 
     def _validate_parameters(self):
@@ -58,10 +58,8 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
             raise ValueError("strike has to be non-negative")
         if isinstance(self.is_call, np.bool_):
             raise ValueError("is_call has to be a boolean")
-        if isinstance(self.is_cash_or_nothing, np.bool_):
-            raise ValueError("is_cash_or_nothing has to be a boolean")
-        if self.cash_or_nothing_payout < 0:
-            raise ValueError("cash_or_nothing_payout has to be positive")
+        if self.payout < 0:
+            raise ValueError("payout has to be positive")
         if self.underlying <= 0:
             raise ValueError("underlying has to be positive")
         if self.time_to_maturity <= 0:
@@ -72,7 +70,7 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
 
 class AssetOrNothingBinaryOption(d.DerivativeInstrument):
     def __init__(
-        self, underlying, strike: np.floating, time_to_maturity, is_call: np.bool_
+        self, underlying: np.floating, strike: np.floating, time_to_maturity: np.floating, is_call: np.bool_
     ):
         super().__init__(underlying, time_to_maturity)
         self.strike = strike
@@ -111,8 +109,6 @@ class AssetOrNothingBinaryOption(d.DerivativeInstrument):
             raise ValueError("strike has to be non-negative")
         if isinstance(self.is_call, np.bool_):
             raise ValueError("is_call has to be a boolean")
-        if isinstance(self.is_cash_or_nothing, np.bool_):
-            raise ValueError("is_cash_or_nothing has to be a boolean")
         if self.underlying <= 0:
             raise ValueError("underlying has to be positive")
         if self.time_to_maturity <= 0:

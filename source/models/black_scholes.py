@@ -34,6 +34,7 @@ class BlackScholes(p.PricingModel):
             "EuropeanOption": True,
             "CashOrNothingBinaryOption": True,
             "AssetOrNothingBinaryOption": True,
+            "TestInstrument": False
         }
 
         return supported_instruments[instrument.__class__.__name__]
@@ -86,9 +87,9 @@ class BlackScholes(p.PricingModel):
             d2 = d1 - self.sigma * np.sqrt(T)
 
             if instrument.is_call:
-                return np.exp(-self.r * T) * norm.cdf(d2)
+                return instrument.payout * np.exp(-self.r * T) * norm.cdf(d2)
             else:
-                return np.exp(-self.r * T) * norm.cdf(-d2)
+                return instrument.payout * np.exp(-self.r * T) * norm.cdf(-d2)
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
             S = instrument.underlying
@@ -146,11 +147,11 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    np.exp(-self.r * T) * norm.pdf(d2) / (S * self.sigma * np.sqrt(T))
+                    instrument.payout * np.exp(-self.r * T) * norm.pdf(d2) / (S * self.sigma * np.sqrt(T))
                 )
             else:
                 return (
-                    -np.exp(-self.r * T) * norm.pdf(-d2) / (S * self.sigma * np.sqrt(T))
+                    -instrument.payout * np.exp(-self.r * T) * norm.pdf(-d2) / (S * self.sigma * np.sqrt(T))
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
