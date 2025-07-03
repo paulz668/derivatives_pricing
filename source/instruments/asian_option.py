@@ -1,17 +1,21 @@
 import numpy as np
+
+from numpy.typing import ArrayLike
 from . import derivative_instrument as d
 from ..models import pricing_model as p
 
 
-class Forward(d.DerivativeInstrument):
+class AsianOption(d.DerivativeInstrument):
     def __init__(
         self,
-        underlying: np.floating,
-        forward_price: np.floating,
-        time_to_maturity: np.floating,
+        underlying: ArrayLike,
+        strike: np.floating,
+        time_to_maturity,
+        is_call: np.bool_,
     ):
         super().__init__(underlying, time_to_maturity)
-        self.forward_price = forward_price
+        self.strike = strike
+        self.is_call = is_call
         self._validate_parameters()
 
     def price(self, model: p.PricingModel) -> np.floating:
@@ -19,6 +23,9 @@ class Forward(d.DerivativeInstrument):
 
     def delta(self, model: p.PricingModel) -> np.floating:
         return model.calculate_delta(self)
+
+    def vega(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_vega(self)
 
     def theta(self, model: p.PricingModel) -> np.floating:
         return model.calculate_theta(self)
@@ -29,15 +36,22 @@ class Forward(d.DerivativeInstrument):
     def epsilon(self, model: p.PricingModel) -> np.floating:
         return model.calculate_epsilon(self)
 
+    def gamma(self, model: p.PricingModel) -> np.floating:
+        return model.calculate_gamma(self)
+
     def payoff(self, underlying_values):
-        return underlying_values - self.forward_price
+        if self.is_call:
+            return np.maximum(np.mean(underlying_values, 0) - self.strike, 0)
+        return np.maximum(self.strike - np.mean(underlying_values, 0), 0)
 
     def _validate_parameters(self):
-        if self.forward_price < 0:
-            raise ValueError("forward_price has to be non-negative")
-        if self.underlying <= 0:
+        if self.strike < 0:
+            raise ValueError("strike has to be non-negative")
+        if isinstance(self.is_call, np.bool_):
+            raise ValueError("is_call has to be a boolean")
+        if np.all(self.underlying > 0):
             raise ValueError("underlying has to be positive")
         if self.time_to_maturity <= 0:
-            raise ValueError("maturity has to be positive")
+            raise ValueError("time_to_maturity has to be positive")
         if self.payoff_fn is not None:
             raise ValueError("payoff_fn has to be None")

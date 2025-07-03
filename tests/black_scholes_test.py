@@ -142,3 +142,77 @@ class TestBlackScholes:
         bs = BlackScholes(0.05, 0.25, 0.02)
         instrument = AssetOrNothingBinaryOption(100, 100, 1.5, False)
         np.testing.assert_allclose(bs.calculate_delta(instrument), -0.8379984387209378)
+
+    # Vega calculation test
+
+    def test_calculate_forward_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = Forward(100, 104.6027859908717, 1.5)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), 0)
+
+    def test_calculate_european_call_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = EuropeanOption(100, 100, 1.5, True)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), 45.32892985676749)
+
+    def test_calculate_european_put_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = EuropeanOption(100, 100, 1.5, False)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), 45.32892985676749)
+
+    def test_calculate_cash_or_nothing_call_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = CashOrNothingBinaryOption(100, 100, 1.5, 100, True)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), -44.42235125963212)
+
+    def test_calculate_cash_or_nothing_put_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = CashOrNothingBinaryOption(100, 100, 1.5, 100, False)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), 44.42235125963212)
+
+    def test_calculate_asset_or_nothing_call_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = AssetOrNothingBinaryOption(100, 100, 1.5, True)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), 0.9065785971353437)
+
+    def test_calculate_asset_or_nothing_put_vega(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = AssetOrNothingBinaryOption(100, 100, 1.5, False)
+        np.testing.assert_allclose(bs.calculate_vega(instrument), -0.9065785971353437)
+
+    # Theta calculation test
+
+    def test_calculate_forward_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = Forward(100, 104.6027859908717, 1.5)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), 3.1380835797261515)
+
+    def test_calculate_european_call_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = EuropeanOption(100, 100, 1.5, True)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), -4.886092144255887)
+
+    def test_calculate_european_put_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = EuropeanOption(100, 100, 1.5, False)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), -2.1882657797101386)
+
+    def test_calculate_cash_or_nothing_call_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = CashOrNothingBinaryOption(100, 100, 1.5, 100, True)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), -2.383574558131168)
+
+    def test_calculate_cash_or_nothing_put_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = CashOrNothingBinaryOption(100, 100, 1.5, 100, False)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), -2.255142873511597)
+
+    def test_calculate_asset_or_nothing_call_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = AssetOrNothingBinaryOption(100, 100, 1.5, True)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), 2.502517586124718)
+
+    def test_calculate_asset_or_nothing_put_theta(self):
+        bs = BlackScholes(0.05, 0.25, 0.02)
+        instrument = AssetOrNothingBinaryOption(100, 100, 1.5, False)
+        np.testing.assert_allclose(bs.calculate_theta(instrument), -4.443408653221735)

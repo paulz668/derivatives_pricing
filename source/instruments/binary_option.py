@@ -17,9 +17,7 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
         super().__init__(underlying, time_to_maturity)
         self.strike = strike
         self.is_call = is_call
-        self.payout = (
-            1 if payout is None else payout
-        )
+        self.payout = 1 if payout is None else payout
         self._validate_parameters()
 
     def price(self, model: p.PricingModel) -> np.floating:
@@ -45,13 +43,9 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
 
     def payoff(self, underlying_values):
         if self.is_call:
-            return np.where(
-                underlying_values >= self.strike, self.payout, 0
-            )
+            return np.where(underlying_values >= self.strike, self.payout, 0)
         else:
-            return np.where(
-                underlying_values < self.strike, self.payout, 0
-            )
+            return np.where(underlying_values < self.strike, self.payout, 0)
 
     def _validate_parameters(self):
         if self.strike < 0:
@@ -70,7 +64,11 @@ class CashOrNothingBinaryOption(d.DerivativeInstrument):
 
 class AssetOrNothingBinaryOption(d.DerivativeInstrument):
     def __init__(
-        self, underlying: np.floating, strike: np.floating, time_to_maturity: np.floating, is_call: np.bool_
+        self,
+        underlying: np.floating,
+        strike: np.floating,
+        time_to_maturity: np.floating,
+        is_call: np.bool_,
     ):
         super().__init__(underlying, time_to_maturity)
         self.strike = strike

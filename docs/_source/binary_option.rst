@@ -11,4 +11,4 @@ Asset or nothing call price: :math:`S\exp(-qT)\Phi(d1)`
 Asset or nothing call delta: :math:`\exp(-q\tau)(\Phi(d_1)+\frac{\phi(d_1)}{\sigma\sqrt{\tau}})`
 
 Asset or nothing put price: :math:`S\exp(-qT)\Phi(-d1)`
-Asset or nothing call delta: :math:`\exp(-q\tau)(\Phi(-d_1)-\frac{\phi(-d_1)}{\sigma\sqrt{\tau}})`
+Asset or nothing put delta: :math:`\exp(-q\tau)(\Phi(-d_1)-\frac{\phi(-d_1)}{\sigma\sqrt{\tau}})`

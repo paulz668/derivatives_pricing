@@ -34,7 +34,7 @@ class BlackScholes(p.PricingModel):
             "EuropeanOption": True,
             "CashOrNothingBinaryOption": True,
             "AssetOrNothingBinaryOption": True,
-            "TestInstrument": False
+            "TestInstrument": False,
         }
 
         return supported_instruments[instrument.__class__.__name__]
@@ -147,11 +147,17 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    instrument.payout * np.exp(-self.r * T) * norm.pdf(d2) / (S * self.sigma * np.sqrt(T))
+                    instrument.payout
+                    * np.exp(-self.r * T)
+                    * norm.pdf(d2)
+                    / (S * self.sigma * np.sqrt(T))
                 )
             else:
                 return (
-                    -instrument.payout * np.exp(-self.r * T) * norm.pdf(-d2) / (S * self.sigma * np.sqrt(T))
+                    -instrument.payout
+                    * np.exp(-self.r * T)
+                    * norm.pdf(-d2)
+                    / (S * self.sigma * np.sqrt(T))
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
@@ -209,17 +215,19 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    -np.exp(-self.r * T)
+                    -instrument.payout
+                    * np.exp(-self.r * T)
                     * norm.pdf(d2)
                     * d1
-                    / (self.sigma**2 * np.sqrt(T))
+                    / self.sigma
                 )
             else:
                 return (
-                    np.exp(-self.r * T)
+                    instrument.payout
+                    * np.exp(-self.r * T)
                     * norm.pdf(-d2)
                     * d1
-                    / (self.sigma**2 * np.sqrt(T))
+                    / self.sigma
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
@@ -292,20 +300,26 @@ class BlackScholes(p.PricingModel):
             d2 = d1 - self.sigma * np.sqrt(T)
 
             if instrument.is_call:
-                return -self.r * np.exp(-self.r * T) * norm.cdf(d2) + np.exp(
-                    -self.r * T
-                ) * norm.pdf(d2) * (
-                    -np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T
-                ) / (
-                    2 * self.sigma * T**1.5
+                return (
+                    instrument.payout
+                    * np.exp(-self.r * T)
+                    * (
+                        -self.r * norm.cdf(d2)
+                        + norm.pdf(d2)
+                        * (-np.log(S / K) + (self.r - self.q - 0.5 * self.sigma**2) * T)
+                        / (2 * self.sigma * T**1.5)
+                    )
                 )
             else:
-                return -self.r * np.exp(-self.r * T) * norm.cdf(-d2) + np.exp(
-                    -self.r * T
-                ) * norm.pdf(-d2) * (
-                    np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T
-                ) / (
-                    2 * self.sigma * T**1.5
+                return (
+                    instrument.payout
+                    * np.exp(-self.r * T)
+                    * (
+                        -self.r * norm.cdf(-d2)
+                        - norm.pdf(-d2)
+                        * (-np.log(S / K) + (self.r - self.q - 0.5 * self.sigma**2) * T)
+                        / (2 * self.sigma * T**1.5)
+                    )
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
@@ -319,21 +333,21 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    -S
+                    S
                     * np.exp(-self.q * T)
                     * (
-                        self.q * norm.cdf(d1)
-                        - norm.pdf(d1)
-                        * (np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T)
+                        -self.q * norm.cdf(d1)
+                        + norm.pdf(d1)
+                        * (-np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
                     )
                 )
             else:
                 return (
-                    -S
+                    S
                     * np.exp(-self.q * T)
                     * (
-                        self.q * norm.cdf(-d1)
+                        -self.q * norm.cdf(-d1)
                         + norm.pdf(-d1)
                         * (np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
