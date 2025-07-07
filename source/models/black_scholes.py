@@ -55,7 +55,7 @@ class BlackScholes(p.PricingModel):
             F = instrument.forward_price
             T = instrument.time_to_maturity
 
-            return S * np.exp((self.r - self.q) * T) - F
+            return S * np.exp(-self.q * T) - np.exp(-self.r * T) * F
 
         if isinstance(instrument, EuropeanOption):
             S = instrument.underlying
@@ -119,7 +119,7 @@ class BlackScholes(p.PricingModel):
         if isinstance(instrument, Forward):
             T = instrument.time_to_maturity
 
-            return np.exp((self.r - self.q) * T)
+            return np.exp(-self.q * T)
 
         if isinstance(instrument, EuropeanOption):
             S = instrument.underlying
@@ -258,9 +258,10 @@ class BlackScholes(p.PricingModel):
 
         if isinstance(instrument, Forward):
             S = instrument.underlying
+            F = instrument.forward_price
             T = instrument.time_to_maturity
 
-            return S * (self.r - self.q) * np.exp((self.r - self.q) * T)
+            return self.q * S * np.exp(-self.q * T) - self.r * F * np.exp(-self.r * T)
 
         if isinstance(instrument, EuropeanOption):
             S = instrument.underlying
@@ -273,21 +274,13 @@ class BlackScholes(p.PricingModel):
             d2 = d1 - self.sigma * np.sqrt(T)
 
             if instrument.is_call:
-                return (
-                    -np.exp(-self.q * T)
-                    * (S * norm.pdf(d1) * self.sigma)
-                    / (2 * np.sqrt(T))
-                    - self.r * K * np.exp(-self.r * T) * norm.cdf(d2)
-                    + self.q * S * np.exp(-self.q * T) * norm.cdf(d1)
-                )
+                return S * np.exp(-self.q * T) * (
+                    self.q * norm.cdf(d1) - (norm.pdf(d1) * self.sigma) / (2 * T)
+                ) - self.r * np.exp(-self.r * T) * K * norm.cdf(d2)
             else:
-                return (
-                    -np.exp(-self.q * T)
-                    * (S * norm.pdf(d1) * self.sigma)
-                    / (2 * np.sqrt(T))
-                    + self.r * K * np.exp(-self.r * T) * norm.cdf(-d2)
-                    - self.q * S * np.exp(-self.q * T) * norm.cdf(-d1)
-                )
+                return S * np.exp(-self.q * T) * (
+                    -self.q * norm.cdf(-d1) - (norm.pdf(d1) * self.sigma) / (2 * T)
+                ) + self.r * np.exp(-self.r * T) * K * norm.cdf(-d2)
 
         if isinstance(instrument, CashOrNothingBinaryOption):
             S = instrument.underlying
@@ -304,9 +297,9 @@ class BlackScholes(p.PricingModel):
                     instrument.payout
                     * np.exp(-self.r * T)
                     * (
-                        -self.r * norm.cdf(d2)
+                        self.r * norm.cdf(d2)
                         + norm.pdf(d2)
-                        * (-np.log(S / K) + (self.r - self.q - 0.5 * self.sigma**2) * T)
+                        * (np.log(S / K) - (self.r - self.q - 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
                     )
                 )
@@ -315,9 +308,9 @@ class BlackScholes(p.PricingModel):
                     instrument.payout
                     * np.exp(-self.r * T)
                     * (
-                        -self.r * norm.cdf(-d2)
+                        self.r * norm.cdf(-d2)
                         - norm.pdf(-d2)
-                        * (-np.log(S / K) + (self.r - self.q - 0.5 * self.sigma**2) * T)
+                        * (np.log(S / K) - (self.r - self.q - 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
                     )
                 )
@@ -336,9 +329,9 @@ class BlackScholes(p.PricingModel):
                     S
                     * np.exp(-self.q * T)
                     * (
-                        -self.q * norm.cdf(d1)
+                        self.q * norm.cdf(d1)
                         + norm.pdf(d1)
-                        * (-np.log(S / K) + (self.r - self.q + 0.5 * self.sigma**2) * T)
+                        * (np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
                     )
                 )
@@ -347,8 +340,8 @@ class BlackScholes(p.PricingModel):
                     S
                     * np.exp(-self.q * T)
                     * (
-                        -self.q * norm.cdf(-d1)
-                        + norm.pdf(-d1)
+                        self.q * norm.cdf(-d1)
+                        - norm.pdf(-d1)
                         * (np.log(S / K) - (self.r - self.q + 0.5 * self.sigma**2) * T)
                         / (2 * self.sigma * T**1.5)
                     )
@@ -366,10 +359,10 @@ class BlackScholes(p.PricingModel):
         self.validate_inputs(instrument=instrument)
 
         if isinstance(instrument, Forward):
-            S = instrument.underlying
+            F = instrument.forward_price
             T = instrument.time_to_maturity
 
-            return S * T * np.exp((self.r - self.q) * T)
+            return -T * np.exp(-self.r * T) * F
 
         if isinstance(instrument, EuropeanOption):
             S = instrument.underlying
@@ -398,13 +391,15 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    -T * np.exp(-self.r * T) * norm.cdf(d2)
-                    + np.exp(-self.r * T) * norm.pdf(d2) * np.sqrt(T) / self.sigma
+                    np.exp(-self.r * T)
+                    * instrument.payout
+                    * (-T * norm.cdf(d2) + norm.pdf(d2) * np.sqrt(T) / self.sigma)
                 )
             else:
                 return (
-                    -T * np.exp(-self.r * T) * norm.cdf(-d2)
-                    - np.exp(-self.r * T) * norm.pdf(-d2) * np.sqrt(T) / self.sigma
+                    np.exp(-self.r * T)
+                    * instrument.payout
+                    * (-T * norm.cdf(-d2) - norm.pdf(-d2) * np.sqrt(T) / self.sigma)
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
@@ -438,7 +433,7 @@ class BlackScholes(p.PricingModel):
             S = instrument.underlying
             T = instrument.time_to_maturity
 
-            return -S * T * np.exp((self.r - self.q) * T)
+            return -T * S * np.exp(-self.q * T)
 
         if isinstance(instrument, EuropeanOption):
             S = instrument.underlying
@@ -465,10 +460,21 @@ class BlackScholes(p.PricingModel):
             d2 = d1 - self.sigma * np.sqrt(T)
 
             if instrument.is_call:
-                return -np.exp(-self.r * T) * norm.pdf(d2) * np.sqrt(T) / self.sigma
+                return (
+                    -np.exp(-self.r * T)
+                    * instrument.payout
+                    * norm.pdf(d2)
+                    * np.sqrt(T)
+                    / self.sigma
+                )
             else:
-                return np.exp(-self.r * T) * norm.pdf(-d2) * np.sqrt(T) / self.sigma
-
+                return (
+                    np.exp(-self.r * T)
+                    * instrument.payout
+                    * norm.pdf(-d2)
+                    * np.sqrt(T)
+                    / self.sigma
+                )
         if isinstance(instrument, AssetOrNothingBinaryOption):
             S = instrument.underlying
             K = instrument.strike
@@ -482,13 +488,13 @@ class BlackScholes(p.PricingModel):
                 return (
                     S
                     * np.exp(-self.q * T)
-                    * (norm.pdf(d1) * np.sqrt(T) / self.sigma - T * norm.cdf(d1))
+                    * (-norm.pdf(d1) * np.sqrt(T) / self.sigma - T * norm.cdf(d1))
                 )
             else:
                 return (
                     S
                     * np.exp(-self.q * T)
-                    * (-norm.pdf(-d1) * np.sqrt(T) / self.sigma - T * norm.cdf(-d1))
+                    * (norm.pdf(-d1) * np.sqrt(T) / self.sigma - T * norm.cdf(-d1))
                 )
 
     def calculate_gamma(self, instrument: DerivativeInstrument):
@@ -526,14 +532,20 @@ class BlackScholes(p.PricingModel):
             d2 = d1 - self.sigma * np.sqrt(T)
 
             if instrument.is_call:
-                return np.exp(-self.r * T) * (
-                    norm.pdf(d2) * self.sigma * np.sqrt(T)
-                    - (d2 * np.exp(-(d2**2) / 2)) / np.sqrt(2 * np.pi)
+                return (
+                    -np.exp(-self.r * T)
+                    * instrument.payout
+                    * norm.pdf(d2)
+                    * d1
+                    / (S**2 * self.sigma**2 * T)
                 )
             else:
-                return -np.exp(-self.r * T) * (
-                    norm.pdf(-d2) * self.sigma * np.sqrt(T)
-                    - (-d2 * np.exp(-(-(d2**2)) / 2)) / np.sqrt(2 * np.pi)
+                return (
+                    np.exp(-self.r * T)
+                    * instrument.payout
+                    * norm.pdf(-d2)
+                    * d1
+                    / (S**2 * self.sigma**2 * T)
                 )
 
         if isinstance(instrument, AssetOrNothingBinaryOption):
@@ -547,23 +559,11 @@ class BlackScholes(p.PricingModel):
 
             if instrument.is_call:
                 return (
-                    np.exp(-self.q * T)
-                    / (S * self.sigma * np.sqrt(T))
-                    * (
-                        norm.pdf(d1)
-                        + (d1 * np.exp(-(d1**2) / 2))
-                        / (np.sqrt(2 * np.pi) * self.sigma * np.sqrt(T))
-                    )
+                    -np.exp(-self.q * T) * norm.pdf(d1) * d2 / (S * self.sigma**2 * T)
                 )
             else:
                 return (
-                    np.exp(-self.q * T)
-                    / (S * self.sigma * np.sqrt(T))
-                    * (
-                        -norm.pdf(-d1)
-                        + (-d1 * np.exp(-(-(d1**2)) / 2))
-                        / (np.sqrt(2 * np.pi) * self.sigma * np.sqrt(T))
-                    )
+                    np.exp(-self.q * T) * norm.pdf(-d1) * d2 / (S * self.sigma**2 * T)
                 )
 
     def _validate_parameters(self):
