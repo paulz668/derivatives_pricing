@@ -54,13 +54,15 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_price,
             EuropeanOption: self._european_option_price,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_price,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_price
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_price,
         }
 
         pricing_method = pricing_methods.get(type(instrument))
         if pricing_method:
             return pricing_method(instrument)
-        raise NotImplementedError(f"Pricing not implemented for {type(instrument).__name__}")
+        raise NotImplementedError(
+            f"Pricing not implemented for {type(instrument).__name__}"
+        )
 
     def calculate_delta(self, instrument: DerivativeInstrument):
         """
@@ -77,14 +79,16 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_delta,
             EuropeanOption: self._european_option_delta,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_delta,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_delta
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_delta,
         }
 
         delta_method = delta_methods.get(type(instrument))
         if delta_method:
             return delta_method(instrument)
-        raise NotImplementedError(f"Delta not implemented for {type(instrument).__name__}")
-    
+        raise NotImplementedError(
+            f"Delta not implemented for {type(instrument).__name__}"
+        )
+
     def calculate_vega(self, instrument: DerivativeInstrument):
         """
         Calculate the vega (dV/dσ) of a derivative instrument in the Black-Scholes world
@@ -100,14 +104,16 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_vega,
             EuropeanOption: self._european_option_vega,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_vega,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_vega
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_vega,
         }
 
         vega_method = vega_methods.get(type(instrument))
         if vega_method:
             return vega_method(instrument)
-        raise NotImplementedError(f"Vega not implemented for {type(instrument).__name__}")    
-            
+        raise NotImplementedError(
+            f"Vega not implemented for {type(instrument).__name__}"
+        )
+
     def calculate_theta(self, instrument: DerivativeInstrument):
         """
         Calculate the theta (dV/dT) of a derivative instrument in the Black-Scholes world
@@ -123,14 +129,16 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_theta,
             EuropeanOption: self._european_option_theta,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_theta,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_theta
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_theta,
         }
 
         theta_method = theta_methods.get(type(instrument))
         if theta_method:
             return theta_method(instrument)
-        raise NotImplementedError(f"Theta not implemented for {type(instrument).__name__}")
-            
+        raise NotImplementedError(
+            f"Theta not implemented for {type(instrument).__name__}"
+        )
+
     def calculate_rho(self, instrument: DerivativeInstrument):
         """
         Calculate the theta (dV/dr) of a derivative instrument in the Black-Scholes world
@@ -146,13 +154,15 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_rho,
             EuropeanOption: self._european_option_rho,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_rho,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_rho
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_rho,
         }
 
         rho_method = rho_methods.get(type(instrument))
         if rho_method:
             return rho_method(instrument)
-        raise NotImplementedError(f"Rho not implemented for {type(instrument).__name__}")
+        raise NotImplementedError(
+            f"Rho not implemented for {type(instrument).__name__}"
+        )
 
     def calculate_epsilon(self, instrument: DerivativeInstrument):
         """
@@ -169,14 +179,15 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_epsilon,
             EuropeanOption: self._european_option_epsilon,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_epsilon,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_epsilon
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_epsilon,
         }
 
         epsilon_method = epsilon_methods.get(type(instrument))
         if epsilon_method:
             return epsilon_method(instrument)
-        raise NotImplementedError(f"Epsilon not implemented for {type(instrument).__name__}")
-    
+        raise NotImplementedError(
+            f"Epsilon not implemented for {type(instrument).__name__}"
+        )
 
     def calculate_gamma(self, instrument: DerivativeInstrument):
         """
@@ -192,14 +203,15 @@ class BlackScholes(p.PricingModel):
             Forward: self._forward_gamma,
             EuropeanOption: self._european_option_gamma,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_gamma,
-            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_gamma
+            AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_gamma,
         }
 
         gamma_method = gamma_methods.get(type(instrument))
         if gamma_method:
             return gamma_method(instrument)
-        raise NotImplementedError(f"Gamma not implemented for {type(instrument).__name__}")
-            
+        raise NotImplementedError(
+            f"Gamma not implemented for {type(instrument).__name__}"
+        )
 
     def _validate_parameters(self):
         if self.r < 0:
@@ -216,8 +228,8 @@ class BlackScholes(p.PricingModel):
         T = forward.time_to_maturity
 
         return S * np.exp(-self.q * T) - np.exp(-self.r * T) * F
-    
-    def _forward_delta(self, forward:Forward) -> np.floating:
+
+    def _forward_delta(self, forward: Forward) -> np.floating:
         T = forward.time_to_maturity
 
         return np.exp(-self.q * T)
@@ -249,14 +261,14 @@ class BlackScholes(p.PricingModel):
 
     # Option helpers
     def _d1(
-            self, 
-            S: np.floating, 
-            K: np.floating, 
-            T: np.floating, 
-            r: Optional[np.floating] = None,
-            q: Optional[np.floating] = None,
-            sigma: Optional[np.floating] = None    
-        ) -> np.floating:
+        self,
+        S: np.floating,
+        K: np.floating,
+        T: np.floating,
+        r: Optional[np.floating] = None,
+        q: Optional[np.floating] = None,
+        sigma: Optional[np.floating] = None,
+    ) -> np.floating:
         if r is None:
             r = self.r
         if q is None:
@@ -264,20 +276,18 @@ class BlackScholes(p.PricingModel):
         if sigma is None:
             sigma = self.sigma
 
-        return (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (
-            sigma * np.sqrt(T)
-        )
-    
+        return (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+
     def _d2(
-            self, 
-            S: np.floating, 
-            K: np.floating, 
-            T: np.floating, 
-            r: Optional[np.floating] = None,
-            q: Optional[np.floating] = None,
-            sigma: Optional[np.floating] = None,
-            d1: Optional[np.floating] = None
-        ) -> np.floating:
+        self,
+        S: np.floating,
+        K: np.floating,
+        T: np.floating,
+        r: Optional[np.floating] = None,
+        q: Optional[np.floating] = None,
+        sigma: Optional[np.floating] = None,
+        d1: Optional[np.floating] = None,
+    ) -> np.floating:
         if r is None:
             r = self.r
         if q is None:
@@ -288,10 +298,8 @@ class BlackScholes(p.PricingModel):
         if d1 is not None:
             return d1 - sigma * np.sqrt(T)
         else:
-            return (np.log(S / K) + (r - q - 0.5 * sigma**2) * T) / (
-                sigma * np.sqrt(T)
-            ) 
-        
+            return (np.log(S / K) + (r - q - 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+
     # European option calculations
     def _european_option_price(self, option: EuropeanOption) -> np.floating:
         S = option.underlying
@@ -382,7 +390,9 @@ class BlackScholes(p.PricingModel):
         return np.exp(-self.q * T) * norm.pdf(d1) / (S * self.sigma * np.sqrt(T))
 
     # Cash or Nothing Binary option calculations
-    def _cash_or_nothing_binary_option_price(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_price(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -394,7 +404,9 @@ class BlackScholes(p.PricingModel):
         else:
             return option.payout * np.exp(-self.r * T) * norm.cdf(-d2)
 
-    def _cash_or_nothing_binary_option_delta(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_delta(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -416,7 +428,9 @@ class BlackScholes(p.PricingModel):
                 / (S * self.sigma * np.sqrt(T))
             )
 
-    def _cash_or_nothing_binary_option_vega(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_vega(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -425,23 +439,13 @@ class BlackScholes(p.PricingModel):
         d2 = self._d2(S, K, T, d1=d1)
 
         if option.is_call:
-            return (
-                -option.payout
-                * np.exp(-self.r * T)
-                * norm.pdf(d2)
-                * d1
-                / self.sigma
-            )
+            return -option.payout * np.exp(-self.r * T) * norm.pdf(d2) * d1 / self.sigma
         else:
-            return (
-                option.payout
-                * np.exp(-self.r * T)
-                * norm.pdf(-d2)
-                * d1
-                / self.sigma
-            )
+            return option.payout * np.exp(-self.r * T) * norm.pdf(-d2) * d1 / self.sigma
 
-    def _cash_or_nothing_binary_option_theta(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_theta(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -472,7 +476,9 @@ class BlackScholes(p.PricingModel):
                 )
             )
 
-    def _cash_or_nothing_binary_option_rho(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_rho(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -492,7 +498,9 @@ class BlackScholes(p.PricingModel):
                 * (-T * norm.cdf(-d2) - norm.pdf(-d2) * np.sqrt(T) / self.sigma)
             )
 
-    def _cash_or_nothing_binary_option_epsilon(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_epsilon(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -516,7 +524,9 @@ class BlackScholes(p.PricingModel):
                 / self.sigma
             )
 
-    def _cash_or_nothing_binary_option_gamma(self, option: CashOrNothingBinaryOption) -> np.floating:
+    def _cash_or_nothing_binary_option_gamma(
+        self, option: CashOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -542,7 +552,9 @@ class BlackScholes(p.PricingModel):
             )
 
     # Asset or Nothing Binary option calculations
-    def _asset_or_nothing_binary_option_price(self, option: AssetOrNothingBinaryOption) -> np.floating:
+    def _asset_or_nothing_binary_option_price(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -553,8 +565,10 @@ class BlackScholes(p.PricingModel):
             return S * np.exp(-self.q * T) * norm.cdf(d1)
         else:
             return S * np.exp(-self.q * T) * norm.cdf(-d1)
-        
-    def _asset_or_nothing_binary_option_delta(self, option: AssetOrNothingBinaryOption) -> np.floating:
+
+    def _asset_or_nothing_binary_option_delta(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -569,8 +583,10 @@ class BlackScholes(p.PricingModel):
             return np.exp(-self.q * T) * (
                 norm.cdf(-d1) - norm.pdf(-d1) / (self.sigma * np.sqrt(T))
             )
-        
-    def _asset_or_nothing_binary_option_vega(self, option: AssetOrNothingBinaryOption) -> np.floating:
+
+    def _asset_or_nothing_binary_option_vega(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -582,8 +598,10 @@ class BlackScholes(p.PricingModel):
             return -S * np.exp(-self.q * T) * norm.pdf(d1) * d2 / self.sigma
         else:
             return S * np.exp(-self.q * T) * norm.pdf(-d1) * d2 / self.sigma
-        
-    def _asset_or_nothing_binary_option_theta(self, option: AssetOrNothingBinaryOption) -> np.floating:
+
+    def _asset_or_nothing_binary_option_theta(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -612,8 +630,10 @@ class BlackScholes(p.PricingModel):
                     / (2 * self.sigma * T**1.5)
                 )
             )
-        
-    def _asset_or_nothing_binary_option_rho(self, option: AssetOrNothingBinaryOption) -> np.floating:
+
+    def _asset_or_nothing_binary_option_rho(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -623,11 +643,11 @@ class BlackScholes(p.PricingModel):
         if option.is_call:
             return S * np.exp(-self.q * T) * norm.pdf(d1) * np.sqrt(T) / self.sigma
         else:
-            return (
-                -S * np.exp(-self.q * T) * norm.pdf(-d1) * np.sqrt(T) / self.sigma
-            )
-        
-    def _asset_or_nothing_binary_option_epsilon(self, option: AssetOrNothingBinaryOption) -> np.floating:
+            return -S * np.exp(-self.q * T) * norm.pdf(-d1) * np.sqrt(T) / self.sigma
+
+    def _asset_or_nothing_binary_option_epsilon(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -646,8 +666,10 @@ class BlackScholes(p.PricingModel):
                 * np.exp(-self.q * T)
                 * (norm.pdf(-d1) * np.sqrt(T) / self.sigma - T * norm.cdf(-d1))
             )
-    
-    def _asset_or_nothing_binary_option_gamma(self, option: AssetOrNothingBinaryOption) -> np.floating:
+
+    def _asset_or_nothing_binary_option_gamma(
+        self, option: AssetOrNothingBinaryOption
+    ) -> np.floating:
         S = option.underlying
         K = option.strike
         T = option.time_to_maturity
@@ -656,10 +678,6 @@ class BlackScholes(p.PricingModel):
         d2 = self._d2(S, K, T, d1=d1)
 
         if option.is_call:
-            return (
-                -np.exp(-self.q * T) * norm.pdf(d1) * d2 / (S * self.sigma**2 * T)
-            )
+            return -np.exp(-self.q * T) * norm.pdf(d1) * d2 / (S * self.sigma**2 * T)
         else:
-            return (
-                np.exp(-self.q * T) * norm.pdf(-d1) * d2 / (S * self.sigma**2 * T)
-            )
+            return np.exp(-self.q * T) * norm.pdf(-d1) * d2 / (S * self.sigma**2 * T)

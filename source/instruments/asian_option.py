@@ -57,6 +57,7 @@ class ArithmeticAverageFixedStrikeAsianOption(d.DerivativeInstrument):
         if self.payoff_fn is not None:
             raise ValueError("payoff_fn has to be None")
 
+
 class ArithmeticAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
     def __init__(
         self,
@@ -111,7 +112,8 @@ class ArithmeticAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
             raise ValueError("time_to_maturity has to be positive")
         if self.payoff_fn is not None:
             raise ValueError("payoff_fn has to be None")
-        
+
+
 class GeometricAverageFixedStrikeAsianOption(d.DerivativeInstrument):
     def __init__(
         self,
@@ -148,8 +150,12 @@ class GeometricAverageFixedStrikeAsianOption(d.DerivativeInstrument):
 
     def payoff(self, underlying_values):
         if self.is_call:
-            return np.maximum(np.exp(np.mean(np.log(underlying_values), 0)) - self.strike, 0)
-        return np.maximum(self.strike - np.exp(np.mean(np.log(underlying_values), 0)), 0)
+            return np.maximum(
+                np.exp(np.mean(np.log(underlying_values), 0)) - self.strike, 0
+            )
+        return np.maximum(
+            self.strike - np.exp(np.mean(np.log(underlying_values), 0)), 0
+        )
 
     def _validate_parameters(self):
         if self.strike < 0:
@@ -162,6 +168,7 @@ class GeometricAverageFixedStrikeAsianOption(d.DerivativeInstrument):
             raise ValueError("time_to_maturity has to be positive")
         if self.payoff_fn is not None:
             raise ValueError("payoff_fn has to be None")
+
 
 class GeometricAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
     def __init__(
@@ -199,7 +206,9 @@ class GeometricAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
 
     def payoff(self, underlying_values):
         if self.strike is not None:
-            strike = np.exp(np.mean(np.log(np.concatenate(self.strike, underlying_values))))
+            strike = np.exp(
+                np.mean(np.log(np.concatenate(self.strike, underlying_values)))
+            )
         else:
             strike = np.exp(np.mean(np.log(underlying_values)))
         if self.is_call:
