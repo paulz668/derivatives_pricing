@@ -13,6 +13,36 @@ class PricingModel(ABC):
         """Main pricing method"""
         pass
 
+    @abstractmethod
+    def calculate_delta(self, instrument: d.DerivativeInstrument) -> float:
+        """Main delta method"""
+        pass
+
+    @abstractmethod
+    def calculate_vega(self, instrument: d.DerivativeInstrument) -> float:
+        """Main vega method"""
+        pass
+
+    @abstractmethod
+    def calculate_theta(self, instrument: d.DerivativeInstrument) -> float:
+        """Main theta method"""
+        pass
+
+    @abstractmethod
+    def calculate_rho(self, instrument: d.DerivativeInstrument) -> float:
+        """Main rho method"""
+        pass
+
+    @abstractmethod
+    def calculate_epsilon(self, instrument: d.DerivativeInstrument) -> float:
+        """Main epsilon method"""
+        pass
+
+    @abstractmethod
+    def calculate_gamma(self, instrument: d.DerivativeInstrument) -> float:
+        """Main gamma method"""
+        pass
+
     def validate_inputs(self, instrument: d.DerivativeInstrument):
         """Common validation for all models"""
         if not self.supports_instrument(instrument):

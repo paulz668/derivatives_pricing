@@ -6,6 +6,7 @@ from ..instruments.derivative_instrument import DerivativeInstrument
 from ..instruments.forward import Forward
 from ..instruments.european_option import EuropeanOption
 from ..instruments.binary_option import *
+from ..instruments.asian_option import *
 
 
 class BlackScholes(p.PricingModel):
@@ -39,7 +40,7 @@ class BlackScholes(p.PricingModel):
 
         return supported_instruments[instrument.__class__.__name__]
 
-    def calculate_price(self, instrument: DerivativeInstrument):
+    def calculate_price(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the price of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -55,6 +56,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_price,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_price,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_price,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: self._geometric_average_fixed_strike_asian_option_price,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         pricing_method = pricing_methods.get(type(instrument))
@@ -64,7 +69,7 @@ class BlackScholes(p.PricingModel):
             f"Pricing not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_delta(self, instrument: DerivativeInstrument):
+    def calculate_delta(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the delta (dV/dS) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -80,6 +85,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_delta,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_delta,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_delta,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         delta_method = delta_methods.get(type(instrument))
@@ -89,7 +98,7 @@ class BlackScholes(p.PricingModel):
             f"Delta not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_vega(self, instrument: DerivativeInstrument):
+    def calculate_vega(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the vega (dV/dσ) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -105,6 +114,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_vega,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_vega,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_vega,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         vega_method = vega_methods.get(type(instrument))
@@ -114,7 +127,7 @@ class BlackScholes(p.PricingModel):
             f"Vega not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_theta(self, instrument: DerivativeInstrument):
+    def calculate_theta(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the theta (dV/dT) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -130,6 +143,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_theta,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_theta,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_theta,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         theta_method = theta_methods.get(type(instrument))
@@ -139,7 +156,7 @@ class BlackScholes(p.PricingModel):
             f"Theta not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_rho(self, instrument: DerivativeInstrument):
+    def calculate_rho(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the theta (dV/dr) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -155,6 +172,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_rho,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_rho,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_rho,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         rho_method = rho_methods.get(type(instrument))
@@ -164,7 +185,7 @@ class BlackScholes(p.PricingModel):
             f"Rho not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_epsilon(self, instrument: DerivativeInstrument):
+    def calculate_epsilon(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the theta (dV/dq) of a derivative instrument in the Black-Scholes world
         Currently supported instruments:
@@ -180,6 +201,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_epsilon,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_epsilon,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_epsilon,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         epsilon_method = epsilon_methods.get(type(instrument))
@@ -189,7 +214,7 @@ class BlackScholes(p.PricingModel):
             f"Epsilon not implemented for {type(instrument).__name__}"
         )
 
-    def calculate_gamma(self, instrument: DerivativeInstrument):
+    def calculate_gamma(self, instrument: DerivativeInstrument) -> np.floating:
         """
         Calculate the gamma (d^2V/dS^2) of a derivative instrument in the Black_Scholes world
         Currently supported instruments:
@@ -204,6 +229,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_gamma,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_gamma,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_gamma,
+            ArithmeticAverageFixedStrikeAsianOption: None,
+            ArithmeticAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFixedStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: None
         }
 
         gamma_method = gamma_methods.get(type(instrument))
@@ -681,3 +710,43 @@ class BlackScholes(p.PricingModel):
             return -np.exp(-self.q * T) * norm.pdf(d1) * d2 / (S * self.sigma**2 * T)
         else:
             return np.exp(-self.q * T) * norm.pdf(-d1) * d2 / (S * self.sigma**2 * T)
+
+    # Arithmetic average fixed strike asian option calculations
+    def _arithmetic_average_fixed_strike_asian_option_price(
+            self, option: ArithmeticAverageFixedStrikeAsianOption
+    ) -> np.floating:
+        pass
+
+    # Arithmetic average floating strike asian option calculations
+    def _arithmetic_average_floating_strike_asian_option_price(
+            self, option: ArithmeticAverageFloatingStrikeAsianOption
+    ) -> np.floating:
+        pass
+
+    # Geometric average fixed strike asian option calculations
+    def _geometric_average_fixed_strike_asian_option_price(
+            self, option: GeometricAverageFixedStrikeAsianOption
+    ) -> np.floating:
+        S = option.underlying
+        K = option.strike
+        T = option.time_to_maturity
+        b_a = 0.5 * (self.r - self.q - self.sigma**2 / 6)
+        sigma_a = self.sigma / np.sqrt(3)
+
+        d1 = self._d1(S, K, T, r=b_a, q=0, sigma=sigma_a)
+        d2 = self._d2(S, K, T, r=b_a, q=0, sigma=sigma_a, d1=d1)
+
+        if option.is_call:
+            return S * np.exp((b_a - self.r) * T) * norm.cdf(d1) - K * np.exp(
+                -self.r * T
+            ) * norm.cdf(d2)
+        else:
+            return K * np.exp(-self.r * T) * norm.cdf(-d2) - S * np.exp(
+                (b_a - self.r) * T
+            ) * norm.cdf(-d1)
+
+    # Geometric average floating strike asian option calculations
+    def _geometric_average_floating_strike_asian_option_price(
+            self, option: GeometricAverageFloatingStrikeAsianOption
+    ) -> np.floating:
+        pass
