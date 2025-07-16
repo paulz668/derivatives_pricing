@@ -15,7 +15,7 @@ class ArithmeticAverageFixedStrikeAsianOption(d.DerivativeInstrument):
         T: np.floating,
         is_call: np.bool_,
     ):
-        super().__init__(underlying, T-t)
+        super().__init__(underlying, T - t)
         self.strike = strike
         self.is_call = is_call
         self.current_time = t
@@ -70,7 +70,7 @@ class ArithmeticAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
         T: np.floating,
         is_call: np.bool_,
     ):
-        super().__init__(underlying, T-t)
+        super().__init__(underlying, T - t)
         self.strike = strike
         self.is_call = is_call
         self.current_time = t

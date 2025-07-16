@@ -729,15 +729,15 @@ class BlackScholes(p.PricingModel):
 
         if option.is_call:
             g = theta_method_pde_solver(
-                state_max=4, 
-                time_max=T, 
-                M=200, 
+                state_max=4,
+                time_max=T,
+                M=200,
                 N=750,
-                a_coeff= lambda S: 0.5 * self.sigma**2 * S**2,
-                b_coeff= lambda S: 1 - (self.r - self.q) * S,
-                c_coeff= lambda S: -self.r,
-                t_cond= lambda S, T: np.maximum(1 - S / T, 0),
-                time_min=t
+                a_coeff=lambda S: 0.5 * self.sigma**2 * S**2,
+                b_coeff=lambda S: 1 - (self.r - self.q) * S,
+                c_coeff=lambda S: -self.r,
+                t_cond=lambda S, T: np.maximum(1 - S / T, 0),
+                time_min=t,
             )
             return option.underlying * g
         else:
@@ -788,8 +788,6 @@ class BlackScholes(p.PricingModel):
         else:
             return G * np.exp(
                 0.5 * (-self.r - self.q + self.sigma**2 / 6) * T
-            ) * norm.cdf(
-                0.5 * sigma_a * T + d1
-            ) - S * np.exp(-self.q * T) * norm.cdf(
+            ) * norm.cdf(0.5 * sigma_a * T + d1) - S * np.exp(-self.q * T) * norm.cdf(
                 self.sigma * np.sqrt(0.75 * T) + d1
             )
