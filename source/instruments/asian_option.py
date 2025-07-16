@@ -11,12 +11,15 @@ class ArithmeticAverageFixedStrikeAsianOption(d.DerivativeInstrument):
         self,
         underlying: ArrayLike,
         strike: np.floating,
-        time_to_maturity,
+        t: np.floating,
+        T: np.floating,
         is_call: np.bool_,
     ):
-        super().__init__(underlying, time_to_maturity)
+        super().__init__(underlying, T-t)
         self.strike = strike
         self.is_call = is_call
+        self.current_time = t
+        self.term = T
         self._validate_parameters()
 
     def price(self, model: p.PricingModel) -> np.floating:
@@ -63,12 +66,15 @@ class ArithmeticAverageFloatingStrikeAsianOption(d.DerivativeInstrument):
         self,
         underlying: ArrayLike,
         strike: Optional[ArrayLike],
-        time_to_maturity,
+        t: np.floating,
+        T: np.floating,
         is_call: np.bool_,
     ):
-        super().__init__(underlying, time_to_maturity)
+        super().__init__(underlying, T-t)
         self.strike = strike
         self.is_call = is_call
+        self.current_time = t
+        self.term = T
         self._validate_parameters()
 
     def price(self, model: p.PricingModel) -> np.floating:

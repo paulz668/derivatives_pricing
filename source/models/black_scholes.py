@@ -2,11 +2,14 @@ import numpy as np
 from scipy.stats import norm
 
 from . import pricing_model as p
+
 from ..instruments.derivative_instrument import DerivativeInstrument
 from ..instruments.forward import Forward
 from ..instruments.european_option import EuropeanOption
 from ..instruments.binary_option import *
 from ..instruments.asian_option import *
+
+from ..utils.pde_solver import theta_method_pde_solver
 
 
 class BlackScholes(p.PricingModel):
@@ -59,7 +62,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: self._geometric_average_fixed_strike_asian_option_price,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         pricing_method = pricing_methods.get(type(instrument))
@@ -88,7 +91,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         delta_method = delta_methods.get(type(instrument))
@@ -117,7 +120,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         vega_method = vega_methods.get(type(instrument))
@@ -146,7 +149,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         theta_method = theta_methods.get(type(instrument))
@@ -175,7 +178,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         rho_method = rho_methods.get(type(instrument))
@@ -204,7 +207,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         epsilon_method = epsilon_methods.get(type(instrument))
@@ -232,7 +235,7 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: None,
             ArithmeticAverageFloatingStrikeAsianOption: None,
             GeometricAverageFixedStrikeAsianOption: None,
-            GeometricAverageFloatingStrikeAsianOption: None
+            GeometricAverageFloatingStrikeAsianOption: None,
         }
 
         gamma_method = gamma_methods.get(type(instrument))
@@ -713,40 +716,80 @@ class BlackScholes(p.PricingModel):
 
     # Arithmetic average fixed strike asian option calculations
     def _arithmetic_average_fixed_strike_asian_option_price(
-            self, option: ArithmeticAverageFixedStrikeAsianOption
+        self, option: ArithmeticAverageFixedStrikeAsianOption
     ) -> np.floating:
         pass
 
     # Arithmetic average floating strike asian option calculations
     def _arithmetic_average_floating_strike_asian_option_price(
-            self, option: ArithmeticAverageFloatingStrikeAsianOption
+        self, option: ArithmeticAverageFloatingStrikeAsianOption
     ) -> np.floating:
-        pass
+        T = option.term
+        t = option.current_time
+
+        if option.is_call:
+            g = theta_method_pde_solver(
+                state_max=4, 
+                time_max=T, 
+                M=200, 
+                N=750,
+                a_coeff= lambda S: 0.5 * self.sigma**2 * S**2,
+                b_coeff= lambda S: 1 - (self.r - self.q) * S,
+                c_coeff= lambda S: -self.r,
+                t_cond= lambda S, T: np.maximum(1 - S / T, 0),
+                time_min=t
+            )
+            return option.underlying * g
+        else:
+            raise NotImplementedError
 
     # Geometric average fixed strike asian option calculations
     def _geometric_average_fixed_strike_asian_option_price(
-            self, option: GeometricAverageFixedStrikeAsianOption
+        self, option: GeometricAverageFixedStrikeAsianOption
     ) -> np.floating:
-        S = option.underlying
+        G = np.exp(np.mean(np.log(option.underlying)))
         K = option.strike
         T = option.time_to_maturity
         b_a = 0.5 * (self.r - self.q - self.sigma**2 / 6)
         sigma_a = self.sigma / np.sqrt(3)
 
-        d1 = self._d1(S, K, T, r=b_a, q=0, sigma=sigma_a)
-        d2 = self._d2(S, K, T, r=b_a, q=0, sigma=sigma_a, d1=d1)
+        d1 = self._d1(G, K, T, r=b_a, q=0, sigma=sigma_a)
+        d2 = self._d2(G, K, T, r=b_a, q=0, sigma=sigma_a, d1=d1)
 
         if option.is_call:
-            return S * np.exp((b_a - self.r) * T) * norm.cdf(d1) - K * np.exp(
+            return G * np.exp((b_a - self.r) * T) * norm.cdf(d1) - K * np.exp(
                 -self.r * T
             ) * norm.cdf(d2)
         else:
-            return K * np.exp(-self.r * T) * norm.cdf(-d2) - S * np.exp(
+            return K * np.exp(-self.r * T) * norm.cdf(-d2) - G * np.exp(
                 (b_a - self.r) * T
             ) * norm.cdf(-d1)
 
     # Geometric average floating strike asian option calculations
     def _geometric_average_floating_strike_asian_option_price(
-            self, option: GeometricAverageFloatingStrikeAsianOption
+        self, option: GeometricAverageFloatingStrikeAsianOption
     ) -> np.floating:
-        pass
+        S = option.underlying
+        G = np.exp(np.mean(np.log(option.strike))) if option.strike is not None else S
+        T = option.time_to_maturity
+        b_a = 0.5 * (self.r - self.q - self.sigma**2 / 6)
+        sigma_a = self.sigma / np.sqrt(3)
+
+        d1 = self._d1(S, G, T, r=b_a, q=0, sigma=sigma_a)
+
+        if option.is_call:
+            return S * np.exp(-self.q * T) * norm.cdf(
+                self.sigma * np.sqrt(0.75 * T) + d1
+            ) - G * np.exp(
+                0.5 * (-self.r - self.q + self.sigma**2 / 6) * T
+            ) * norm.cdf(
+                0.5 * sigma_a * T + d1
+            )
+        else:
+            return G * np.exp(
+                0.5 * (-self.r - self.q + self.sigma**2 / 6) * T
+            ) * norm.cdf(
+                0.5 * sigma_a * T + d1
+            ) - S * np.exp(-self.q * T) * norm.cdf(
+                self.sigma * np.sqrt(0.75 * T) + d1
+            )
