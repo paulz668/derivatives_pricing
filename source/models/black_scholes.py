@@ -332,6 +332,23 @@ class BlackScholes(p.PricingModel):
         else:
             return (np.log(S / K) + (r - q - 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
 
+    def _get_default_steps(self, option: DerivativeInstrument):
+        defaults = {
+            ArithmeticAverageFixedStrikeAsianOption: {
+                "M": 200,
+                "N": 800,
+                "state_max": 4
+            },
+            ArithmeticAverageFloatingStrikeAsianOption: None
+        }
+
+        default_steps = defaults.get(type(option))
+        if default_steps:
+            return default_steps
+        raise NotImplementedError(
+            f"No default steps available for {type(option).__name__}"
+        )
+
     # European option calculations
     def _european_option_price(self, option: EuropeanOption) -> np.floating:
         S = option.underlying
@@ -718,7 +735,48 @@ class BlackScholes(p.PricingModel):
     def _arithmetic_average_fixed_strike_asian_option_price(
         self, option: ArithmeticAverageFixedStrikeAsianOption
     ) -> np.floating:
-        pass
+        T = option.term
+        t = option.current_time
+
+        params = self._get_default_steps(option)
+
+        if option.strike is None:
+            Y = 0
+            state_max = 3
+        else:
+            Y = np.mean(option.underlying) / option.underlying[-1]
+            state_max = params.get("state_max") * Y
+
+        if option.is_call:
+            g, states, times = theta_method_pde_solver(
+                state_max=state_max,
+                time_max=T,
+                M=params.get("M"),
+                N=params.get("N"),
+                a_coeff=lambda S: 0.5 * self.sigma**2 * S**2,
+                b_coeff=lambda S: 1 - (self.r - self.q) * S,
+                c_coeff=lambda S: -self.r,
+                t_cond=lambda S, T: np.maximum(S / T - 1, 0),
+                time_min=t,
+            )
+            state = np.where(states == Y)[0][0]
+            time = np.where(times == t)[0][0]
+            return option.underlying[-1] * g[state, time]
+        else:
+            g, states, times = theta_method_pde_solver(
+                state_max=state_max,
+                time_max=T,
+                M=params.get("M"),
+                N=params.get("N"),
+                a_coeff=lambda S: 0.5 * self.sigma**2 * S**2,
+                b_coeff=lambda S: 1 - (self.r - self.q) * S,
+                c_coeff=lambda S: -self.r,
+                t_cond=lambda S, T: np.maximum(1 - S / T, 0),
+                time_min=t,
+            )
+            state = np.where(states == Y)[0][0]
+            time = np.where(times == t)[0][0]
+            return option.underlying[-1] * g[state, time]
 
     # Arithmetic average floating strike asian option calculations
     def _arithmetic_average_floating_strike_asian_option_price(
@@ -727,21 +785,45 @@ class BlackScholes(p.PricingModel):
         T = option.term
         t = option.current_time
 
+        params = self._get_default_steps(option)
+
+        if option.strike is None:
+            Y = 0
+            state_max = 3
+        else:
+            Y = np.mean(option.strike) / option.underlying
+            state_max = params.get("state_max") * Y
+
         if option.is_call:
-            g = theta_method_pde_solver(
-                state_max=4,
+            g, states, times = theta_method_pde_solver(
+                state_max=state_max,
                 time_max=T,
-                M=200,
-                N=750,
+                M=params.get("M"),
+                N=params.get("N"),
                 a_coeff=lambda S: 0.5 * self.sigma**2 * S**2,
                 b_coeff=lambda S: 1 - (self.r - self.q) * S,
                 c_coeff=lambda S: -self.r,
                 t_cond=lambda S, T: np.maximum(1 - S / T, 0),
                 time_min=t,
             )
-            return option.underlying * g
+            state = np.where(states == Y)[0][0]
+            time = np.where(times == t)[0][0]
+            return option.underlying * g[state, time]
         else:
-            raise NotImplementedError
+            g, states, times = theta_method_pde_solver(
+                state_max=state_max,
+                time_max=T,
+                M=params.get("M"),
+                N=params.get("N"),
+                a_coeff=lambda S: 0.5 * self.sigma**2 * S**2,
+                b_coeff=lambda S: 1 - (self.r - self.q) * S,
+                c_coeff=lambda S: -self.r,
+                t_cond=lambda S, T: np.maximum(S / T - 1, 0),
+                time_min=t,
+            )
+            state = np.where(states == Y)[0][0]
+            time = np.where(times == t)[0][0]
+            return option.underlying * g[state, time]
 
     # Geometric average fixed strike asian option calculations
     def _geometric_average_fixed_strike_asian_option_price(

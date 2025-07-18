@@ -78,4 +78,4 @@ def theta_method_pde_solver(
         lu_decomp = splu(coeff_matrix_current)
         g[:i] = lu_decomp.solve(target)
 
-    return g
+    return g, state, time
