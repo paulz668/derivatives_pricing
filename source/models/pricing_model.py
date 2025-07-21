@@ -34,11 +34,6 @@ class PricingModel(ABC):
         pass
 
     @abstractmethod
-    def calculate_epsilon(self, instrument: d.DerivativeInstrument) -> float:
-        """Main epsilon method"""
-        pass
-
-    @abstractmethod
     def calculate_gamma(self, instrument: d.DerivativeInstrument) -> float:
         """Main gamma method"""
         pass

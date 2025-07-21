@@ -337,9 +337,13 @@ class BlackScholes(p.PricingModel):
             ArithmeticAverageFixedStrikeAsianOption: {
                 "M": 200,
                 "N": 800,
-                "state_max": 4
+                "state_max": 4,
             },
-            ArithmeticAverageFloatingStrikeAsianOption: None
+            ArithmeticAverageFloatingStrikeAsianOption: {
+                "M": 200,
+                "N": 800,
+                "state_max": 4,
+            },
         }
 
         default_steps = defaults.get(type(option))
