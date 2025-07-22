@@ -59,10 +59,10 @@ class BlackScholes(p.PricingModel):
             EuropeanOption: self._european_option_price,
             CashOrNothingBinaryOption: self._cash_or_nothing_binary_option_price,
             AssetOrNothingBinaryOption: self._asset_or_nothing_binary_option_price,
-            ArithmeticAverageFixedStrikeAsianOption: None,
-            ArithmeticAverageFloatingStrikeAsianOption: None,
+            ArithmeticAverageFixedStrikeAsianOption: self._arithmetic_average_fixed_strike_asian_option_price,
+            ArithmeticAverageFloatingStrikeAsianOption: self._arithmetic_average_floating_strike_asian_option_price,
             GeometricAverageFixedStrikeAsianOption: self._geometric_average_fixed_strike_asian_option_price,
-            GeometricAverageFloatingStrikeAsianOption: None,
+            GeometricAverageFloatingStrikeAsianOption: self._geometric_average_floating_strike_asian_option_price,
         }
 
         pricing_method = pricing_methods.get(type(instrument))
